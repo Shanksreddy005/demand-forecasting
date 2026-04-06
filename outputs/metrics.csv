@@ -1,0 +1,5 @@
+model,rmse,mape
+ARIMA,27.02,8.56
+Prophet,15.62,4.84
+XGBoost,15.0,3.96
+Ensemble,14.1,3.86
