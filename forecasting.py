@@ -70,8 +70,11 @@ def load_data():
         df = train[(train["store_nbr"] == STORE_ID) & (train["family"] == FAMILY)].copy()
         df = df.merge(stores, on="store_nbr", how="left")
         df = df.merge(oil, on="date", how="left")
-        df["dcoilwtico"] = df["dcoilwtico"].interpolate(method="linear")
         df = df.sort_values("date").reset_index(drop=True)
+        df["dcoilwtico"] = df["dcoilwtico"].interpolate(method="linear")
+        df["dcoilwtico"] = df["dcoilwtico"].bfill()
+        df["dcoilwtico"] = df["dcoilwtico"].ffill()
+        df["dcoilwtico"] = df["dcoilwtico"].fillna(df["dcoilwtico"].mean())
         df = df[["date", "sales", "onpromotion", "dcoilwtico"]].copy()
         df.rename(columns={"sales": "y", "date": "ds"}, inplace=True)
 
@@ -218,7 +221,7 @@ def run_xgboost(train_fe, test_fe):
 
 
 def ensemble_forecast(preds_arima, preds_prophet, preds_xgb,
-                       weights=(0.2, 0.35, 0.45)):
+                       weights=(0.05, 0.40, 0.55)):
     """Weighted ensemble of all three models."""
     return (weights[0] * preds_arima +
             weights[1] * preds_prophet +
